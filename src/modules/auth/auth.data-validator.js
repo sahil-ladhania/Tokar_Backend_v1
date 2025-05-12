@@ -69,19 +69,20 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const changePasswordSchema = z.object({
-    params: z.object({}).optional(), 
-    query:  z.object({}).optional(), 
-    body : z.object({
-        currentPassword : passwordSchema,
-        newPassword : passwordSchema,
-        confirmNewPassword : passwordSchema,
-    })
-})
-.refine((date) => date.newPassword === date.confirmNewPassword , {
-    message: "New Password and Confirm Password do not match !!!",
-    path: ["confirmNewPassword"],
-})
-.refine((data) => (data.currentPassword !== data.newPassword) , {
-    message: "New Password must be different from Current Password !!!",
-    path: ["newPassword"],
-});
+    params: z.object({}).optional(),
+    query:  z.object({}).optional(),
+    body: z
+      .object({
+        currentPassword: passwordSchema,
+        newPassword:     passwordSchema,
+        confirmPassword: passwordSchema,
+      })
+      .refine(b => b.newPassword === b.confirmPassword, {
+        message: "New Password and Confirm Password do not match!",
+        path:    ["confirmPassword"],
+      })
+      .refine(b => b.newPassword !== b.currentPassword, {
+        message: "New Password must be different from Current Password!",
+        path:    ["newPassword"],
+      }),
+  });
