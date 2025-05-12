@@ -1,6 +1,6 @@
 import express from 'express';
 import authRouter from './modules/auth/auth.routes.js';
-import errorHandler from './middlewares/error/errorHandler.js';
+import { errorHandler } from './middlewares/error/errorHandler.js';
 
 const app = express();
 const port = process.env.PORT || 3000;

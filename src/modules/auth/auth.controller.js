@@ -17,15 +17,6 @@ export const loginController = async(req , res , next) => {
     }
 }
 
-export const logoutController = async(req , res , next) => {
-    try {
-        
-    } 
-    catch (error) {
-        next(error);
-    }
-}
-
 export const forgotPasswordController = async(req , res , next) => {
     try {
         
@@ -53,7 +44,7 @@ export const changePasswordController = async(req , res , next) => {
     }
 }
 
-export const getProfileController = async(req , res , next) => {
+export const logoutController = async(req , res , next) => {
     try {
         
     } 
