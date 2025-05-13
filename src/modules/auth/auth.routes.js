@@ -11,6 +11,6 @@ router.post('/login', validateRequest(loginSchema) ,  loginController);
 router.put('/change-password', authenticate , validateRequest(changePasswordSchema) ,  changePasswordController);
 router.post('/forgot-password', authenticate , validateRequest(forgotPasswordSchema) ,  forgotPasswordController);
 router.post('/reset-password' , validateRequest(resetPasswordSchema) , resetPasswordController);
-router.post('/logout', authenticate , logoutController);
+router.post('/logout', logoutController);
 
 export default router
