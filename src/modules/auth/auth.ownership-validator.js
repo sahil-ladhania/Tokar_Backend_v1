@@ -13,3 +13,21 @@ export const ifUserExist = async(email) => {
         throw new Error("Error Checking User Existance !!!" , error);
     }
 }
+
+export const ifUserValid = async(resetToken) => {
+    try {
+        const user = await prisma.user.findFirst({
+            where : {
+                passwordResetToken : resetToken,
+                passwordResetExpires : {
+                    gt : new Date()
+                }
+            }
+        })
+
+        return user;
+    }
+    catch (error) {
+        throw new Error("Error Checking User Validity !!!" , error);
+    }
+}

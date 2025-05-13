@@ -54,33 +54,45 @@ export const changePasswordService = async({email , password}) => {
         return updatedCredentials;
     } 
     catch (error) {
-        throw new Error("Message..." , error);
+        throw new Error("Error Changing Password !!!" , error);
     }
 }
 
-export const forgotPasswordService = async() => {
+export const forgotPasswordService = async({email , resetToken , expiresIn}) => {
     try {
-        
+        const user = await prisma.user.update({
+            where : {
+                email : email
+            },
+            data : {
+                passwordResetToken : resetToken,
+                passwordResetExpires : expiresIn
+            }
+        });
+
+        return user;
     } 
     catch (error) {
-        throw new Error("Message..." , error);
+        throw new Error("Error Updating Password Reset Token and Expiry !!!" , error);
     }
 }
 
-export const resetPasswordService = async() => {
+export const resetPasswordService = async({email , password}) => {
     try {
-        
-    } 
-    catch (error) {
-        throw new Error("Message..." , error);
-    }
-}
+        const user = await prisma.user.update({
+            where : {
+                email : email
+            },
+            data : {
+                password : password,
+                passwordResetToken: null,
+                passwordResetExpires: null
+            }
+        });
 
-export const logoutService = async() => {
-    try {
-        
+        return user;
     } 
     catch (error) {
-        throw new Error("Message..." , error);
+        throw new Error("Error Resetting Password !!!" , error);
     }
 }

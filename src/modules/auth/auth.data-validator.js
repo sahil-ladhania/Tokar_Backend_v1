@@ -85,4 +85,18 @@ export const changePasswordSchema = z.object({
         message: "New Password must be different from Current Password!",
         path:    ["newPassword"],
       }),
-  });
+});
+
+export const resetPasswordSchema = z.object({
+    params: z.object({}).optional(),
+    query:  z.object({}).optional(),
+    body: z
+      .object({
+        newPassword:     passwordSchema,
+        confirmPassword: passwordSchema,
+      })
+      .refine(b => b.newPassword === b.confirmPassword, {
+        message: "New Password and Confirm Password do not match!",
+        path:    ["confirmPassword"],
+      })
+});

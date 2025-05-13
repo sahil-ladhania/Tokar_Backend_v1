@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 export const hashingPassword = async(password) => {
     const saltRounds = 10;
@@ -29,3 +31,29 @@ export const generateJWT = async(userId , firstName , email) => {
 
     return JWT;
 }
+
+export const generatePasswordResetToken = () => {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresIn = new Date(Date.now() + 15 * 60  * 1000);
+    return {resetToken , expiresIn};
+}
+
+export const sendPasswordResetEmail = async({ to, subject, html }) => {
+    const transport = nodemailer.createTransport({
+        host: "sandbox.smtp.mailtrap.io",
+        port: 2525,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const info = await transport.sendMail({
+        from: '"YourApp" <noreply@yourapp.com>',
+        to,
+        subject,
+        html
+    });
+    
+    return info;
+};

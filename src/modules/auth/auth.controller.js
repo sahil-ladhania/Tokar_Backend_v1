@@ -1,8 +1,8 @@
 import { sendError } from "../../utils/sendError.js";
 import { sendSuccess } from "../../utils/sendSuccess.js";
-import { comparingPassword, hashingPassword } from "./auth.helper.js";
-import { ifUserExist } from "./auth.ownership-validator.js";
-import { changePasswordService, loginService, signupService } from "./auth.service.js";
+import { comparingPassword, generatePasswordResetToken, hashingPassword, sendPasswordResetEmail } from "./auth.helper.js";
+import { ifUserExist, ifUserValid } from "./auth.ownership-validator.js";
+import { changePasswordService, forgotPasswordService, loginService, resetPasswordService, signupService } from "./auth.service.js";
 
 export const signupController = async(req , res , next) => {
     try {
@@ -91,7 +91,31 @@ export const changePasswordController = async(req , res , next) => {
 
 export const forgotPasswordController = async(req , res , next) => {
     try {
+        const {email} = req.body;
         
+        const userExist = await ifUserExist(email);
+        if(!userExist){
+            return sendError(res , 400 , "User Doesnt Exist !!!");
+        }
+
+        const {resetToken , expiresIn} = generatePasswordResetToken();
+
+        const updatedPasswordData = await forgotPasswordService({email , resetToken , expiresIn});
+
+        const resetLink = `http://localhost:3000/api/auth/reset-password?token=${resetToken}`;
+        
+        const emailInfo = await sendPasswordResetEmail({
+            to: email,
+            subject: 'Reset Your Password',
+            html: `
+              <h2>Password Reset</h2>
+              <p>Click below to reset your password:</p>
+              <a href="${resetLink}">${resetLink}</a>
+            `
+        });
+
+        return sendSuccess(res , 200 , { message: "Reset Link Sent to your Email !!!" })
+
     } 
     catch (error) {
         next(error);
@@ -100,7 +124,22 @@ export const forgotPasswordController = async(req , res , next) => {
 
 export const resetPasswordController = async(req , res , next) => {
     try {
+        const {newPassword , confirmPassword} = req.body;
+        const {resetToken} = req.query;
+
+        const userValid = await ifUserValid(resetToken);
+        if(!userValid){
+            return sendError(res , 400 , "User Isnt Valid !!!");
+        }
+
+        const hashedPassword = await hashingPassword(newPassword);
+
+        const updatedCredentials = await resetPasswordService({email : userValid.email , password : hashedPassword});
+        if(!updatedCredentials){
+            return sendError(res , 500 , "Error Updating Credentials !!!");
+        }
         
+        return sendSuccess(res , 200 , { message: "Password Reset Successfully !!!" });
     } 
     catch (error) {
         next(error);
@@ -109,7 +148,14 @@ export const resetPasswordController = async(req , res , next) => {
 
 export const logoutController = async(req , res , next) => {
     try {
-        
+        res.clearCookie("jwt" , {
+            path: "/",                
+            httpOnly: false,          
+            sameSite: "None",         
+            secure: false,   
+        });
+
+        return sendSuccess(res , 200 , {message : "Logged Out Successfully !!!"});
     } 
     catch (error) {
         next(error);
