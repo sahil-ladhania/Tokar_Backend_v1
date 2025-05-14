@@ -8,8 +8,8 @@ const router = Router();
 
 router.post('/signup', validateRequest(signupSchema) , signupController);
 router.post('/login', validateRequest(loginSchema) ,  loginController);
-router.put('/change-password', authenticate , validateRequest(changePasswordSchema) ,  changePasswordController);
-router.post('/forgot-password', authenticate , validateRequest(forgotPasswordSchema) ,  forgotPasswordController);
+router.put('/change-password' , authenticate , validateRequest(changePasswordSchema) ,  changePasswordController);
+router.post('/forgot-password' , validateRequest(forgotPasswordSchema) ,  forgotPasswordController);
 router.post('/reset-password' , validateRequest(resetPasswordSchema) , resetPasswordController);
 router.post('/logout', logoutController);
 

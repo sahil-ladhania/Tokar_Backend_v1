@@ -102,7 +102,7 @@ export const forgotPasswordController = async(req , res , next) => {
 
         const updatedPasswordData = await forgotPasswordService({email , resetToken , expiresIn});
 
-        const resetLink = `http://localhost:3000/api/auth/reset-password?token=${resetToken}`;
+        const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
         
         const emailInfo = await sendPasswordResetEmail({
             to: email,
