@@ -7,6 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Game Mode Enum
+enum GameMode {
+  COMPUTER
+  RANDOM
+  FRIENDS
+}
+
+// Game Status Enum
+enum GameStatus {
+  WAITING
+  IN_PROGRESS
+  FINISHED
+}
+
+// Token State Enum
+enum TokenState {
+  HOME
+  ON_BOARD
+  FINISHED
+}
+
+// Invitation Status Enum
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 // User Model
 model User {
   userId Int @id @default(autoincrement())
@@ -17,13 +45,113 @@ model User {
   password String
   passwordResetToken String? 
   passwordResetExpires DateTime? 
+  participants Participant[]
+  sendInvitations Invitation[] @relation("Inviter")
+  receivedInvitations Invitation[] @relation("Invitee")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// Game Mode Enum
-enum GameMode {
-  COMPUTER
-  RANDOM
-  FRIENDS
+// Participant Model
+model Participant {
+  participantId Int @id @default(autoincrement())
+  gameSession GameSession @relation(fields: [gameSessionId] , references: [gameSessionId])
+  gameSessionId Int 
+  user User? @relation(fields: [userId] , references: [userId])
+  userId Int?
+  isBot Boolean @default(false)
+  seatNumber Int
+  tokens Token[]
+  moveLogs MoveLog[]
+  @@unique([gameSessionId , seatNumber])
 }
+
+// GameSession Model
+model GameSession {
+  gameSessionId Int @id @default(autoincrement())
+  gameMode GameMode
+  gameStatus GameStatus
+  participants Participant[]
+  moveLogs MoveLog[]
+  invitations Invitation[]
+  gameStartTime DateTime @default(now())
+  gameEndTime DateTime?
+}
+
+// Token Model
+model Token {
+  tokenId Int @id @default(autoincrement())
+  participant Participant @relation(fields: [participantId] , references: [participantId])
+  participantId Int
+  tokenIndex Int 
+  position Int
+  tokenState TokenState
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([participantId , tokenIndex])
+}
+
+// MoveLog Model
+model MoveLog {
+  moveLogId Int @id @default(autoincrement())
+  gameSession GameSession @relation(fields: [gameSessionId] , references: [gameSessionId])
+  gameSessionId Int 
+  participant Participant @relation(fields: [participantId] , references: [participantId])
+  participantId Int
+  diceValue Int 
+  tokenIndex Int
+  fromPosition Int
+  toPosition Int
+  moveOrder Int?
+  createdAt DateTime @default(now())
+}
+
+// Invitation Model
+model Invitation {
+  invitationId Int @id @default(autoincrement())
+  gameSession GameSession @relation(fields: [gameSessionId] , references: [gameSessionId])
+  gameSessionId Int
+  inviter User @relation("Inviter" , fields: [inviterId] , references: [userId])
+  inviterId Int
+  invitee User @relation("Invitee" , fields: [inviteeId] , references: [userId])
+  inviteeId Int
+  invitationStatus InvitationStatus
+  createdAt DateTime @default(now())
+  respondedAt DateTime? 
+}
+
+/*
+
+1. User → Participant (1:M)
+	•	Ek User ke multiple Participant records ho sakte hain (har nayi game session ke liye ek).
+	•	Har Participant record sirf ek hi User ko refer karega (agar human player hai).
+
+2. GameSession → Participant (1:M)
+	•	Ek GameSession me kai Participants ho sakte hain (max 4 players/bots).
+	•	Har Participant record ek hi GameSession ko point karega.
+
+3. Participant → Token (1:M)
+	•	Har Participant ke paas exactly 4 Tokens ho sakte hain (us session ke pieces).
+	•	Har Token ek hi Participant ko belong karega.
+
+4. Participant → MoveLog (1:M)
+	•	Ek Participant apni har move ke liye multiple MoveLog entries create karega.
+	•	Har MoveLog entry ek hi Participant ki ek specific move ko represent karegi.
+
+5. GameSession → MoveLog (1:M)
+	•	Ek GameSession me saare players ke moves milake bahut saare MoveLog entries hongi.
+	•	Har MoveLog entry ek hi GameSession ki kisi move history ko belong karegi.
+
+6. GameSession → Invitation (1:M)
+	•	Ek GameSession ke liye kai Invitations create ho sakte hain (friends ko bulane ke liye).
+	•	Har Invitation ek hi GameSession ko refer karegi.
+
+7. User (as inviter) → Invitation (1:M)
+	•	Ek User kai Invitations bhej sakta hai (dusre users ko game invite karne ke liye).
+	•	Har Invitation record ek hi inviter User ko point karega.
+
+8. User (as invitee) → Invitation (1:M)
+	•	Ek User kai Invitations receive kar sakta hai.
+	•	Har Invitation entry ek hi invitee User ko refer karegi.
+  
+*/
