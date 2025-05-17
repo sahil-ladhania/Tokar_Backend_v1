@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Token` MODIFY `tokenIndex` INTEGER NOT NULL DEFAULT -1,
+    MODIFY `tokenState` ENUM('HOME', 'ON_BOARD', 'FINISHED') NOT NULL DEFAULT 'HOME';

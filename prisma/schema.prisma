@@ -69,6 +69,7 @@ model Participant {
 // GameSession Model
 model GameSession {
   gameSessionId Int @id @default(autoincrement())
+  roomCode String @unique
   gameMode GameMode
   gameStatus GameStatus
   participants Participant[]
@@ -84,8 +85,8 @@ model Token {
   participant Participant @relation(fields: [participantId] , references: [participantId])
   participantId Int
   tokenIndex Int 
-  position Int
-  tokenState TokenState
+  position Int @default(-1)
+  tokenState TokenState @default(HOME)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([participantId , tokenIndex])

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Token` ALTER COLUMN `tokenIndex` DROP DEFAULT,
+    MODIFY `position` INTEGER NOT NULL DEFAULT -1;
