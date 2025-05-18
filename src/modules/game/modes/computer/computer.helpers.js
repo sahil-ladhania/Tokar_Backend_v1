@@ -1,10 +1,4 @@
-import { nanoid } from 'nanoid';
 import prisma from '../../../../db/DB.js';
-
-export const generateRoomCode = (length) => {
-    const roomCode = nanoid(length);
-    return roomCode;
-}
 
 export const determineHostSeat = (chosenColor) => {
     if(chosenColor === 'red'){

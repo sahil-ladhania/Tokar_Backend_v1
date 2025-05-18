@@ -1,5 +1,6 @@
 import prisma from "../../../../db/DB.js";
-import { createTokensForParticipant, determineHostSeat, generateRoomCode, getAvailableBotSeats } from "./computer.helpers.js";
+import { generateRoomCode } from "../../utils/roomCode.utils.js";
+import { createTokensForParticipant, determineHostSeat, getAvailableBotSeats } from "./computer.helpers.js";
 
 export const createGameSessionService = async({userId , numberOfPlayers , choseTokenColor}) => {
     try {
