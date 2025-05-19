@@ -53,7 +53,7 @@ export const loginController = async(req , res , next) => {
 
         const { password: hashP, ...safeUser } = user;
 
-        return sendSuccess(res , 200 , {user: safeUser});
+        return sendSuccess(res , 200 , {user: safeUser , token : jwt});
     } 
     catch (error) {
         next(error);

@@ -1,6 +1,6 @@
-import { deQueue } from "./game.matchmaking.queue"
+import { deQueue } from "./game.matchmaking.queue.js"
 
-export const attemptMatch = (socketId, userId, preferredColor, totalPlayers) => {
+export const attemptMatch = ({socketId, userId, preferredColor, totalPlayers}) => {
     const groupFromQueue = deQueue(totalPlayers , preferredColor);
     let fullGroup;
 

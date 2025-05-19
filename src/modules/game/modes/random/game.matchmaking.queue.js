@@ -4,7 +4,7 @@ const queueStore = {
     "4" : []
 };
 
-export const enQueue = (socketId , userId , totalPlayers , preferredColor) => {
+export const enQueue = ({socketId , userId , totalPlayers , preferredColor}) => {
     if(totalPlayers === 2){
         queueStore[2].push({
             "socketId" : socketId,

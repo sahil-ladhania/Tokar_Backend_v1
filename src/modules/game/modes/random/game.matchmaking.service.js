@@ -56,7 +56,7 @@ export const createMatchSessionService = async (group) => {
 
       return {
         roomCode,
-        sessionId: gameSession.gameSessionId,
+        gameSessionId: gameSession.gameSessionId,
         participants,
       };
     });
