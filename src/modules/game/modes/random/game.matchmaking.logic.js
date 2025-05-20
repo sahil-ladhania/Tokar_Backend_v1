@@ -1,18 +1,13 @@
-import { deQueue } from "./game.matchmaking.queue.js"
+import { deQueue, queueStore } from "./game.matchmaking.queue.js"
 
-export const attemptMatch = ({socketId, userId, preferredColor, totalPlayers}) => {
-    const groupFromQueue = deQueue(totalPlayers , preferredColor);
-    let fullGroup;
-
-    if(groupFromQueue === null){    
+export const attemptMatch = ({totalPlayers}) => {
+    const fullGroup = deQueue(totalPlayers);
+    if (!fullGroup){
         return null;
-    }
-    else{
-        fullGroup = [
-            {socketId, userId, preferredColor},
-            ...groupFromQueue
-        ];
     };
 
+    queueStore[totalPlayers] = queueStore[totalPlayers].filter(q =>
+        !fullGroup.some(p => p.userId === q.userId)
+    );
     return fullGroup;
 }

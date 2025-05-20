@@ -4,6 +4,7 @@ import { enQueue } from "../../modes/random/game.matchmaking.queue.js";
 import { createMatchSessionService } from "../../modes/random/game.matchmaking.service.js";
 import { socketJoinMatchmakingSchema } from '../../modes/random/game.matchmaking.data-validator.js';
 
+
 export const joinMatchmaking = (socket , io) => {
     socket.on("join-matchmaking" , async({ totalPlayers, preferredColor , token }) => {
         const result = socketJoinMatchmakingSchema.safeParse({ totalPlayers, preferredColor, token });
@@ -21,7 +22,7 @@ export const joinMatchmaking = (socket , io) => {
 
             enQueue({socketId : socket.id , userId , totalPlayers , preferredColor}); 
 
-            const fullGroup = attemptMatch({socketId : socket.id , userId , totalPlayers , preferredColor}); // How to get the userId and socketId ?
+            const fullGroup = attemptMatch({totalPlayers}); 
 
             if(fullGroup){
                 const gameSessionData = await createMatchSessionService(fullGroup);
