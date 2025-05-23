@@ -75,6 +75,7 @@ model GameSession {
   participants Participant[]
   moveLogs MoveLog[]
   invitations Invitation[]
+  maxPlayers Int
   gameStartTime DateTime @default(now())
   gameEndTime DateTime?
 }

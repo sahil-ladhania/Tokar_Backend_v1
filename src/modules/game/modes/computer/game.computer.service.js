@@ -6,7 +6,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
     try {
         const gameSessionData = await prisma.$transaction(async (tx) => {
             const roomCode = generateRoomCode(6);
-            console.log(roomCode);
 
             const gameSession = await tx.gameSession.create({
                 data : {
@@ -15,10 +14,8 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                     roomCode : roomCode
                 }
             });
-            console.log(gameSession);
 
             const hostSeat = determineHostSeat(choseTokenColor);
-            console.log(hostSeat);
 
             const hostParticipant = await tx.participant.create({
                 data : {
@@ -28,7 +25,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                     seatNumber : hostSeat
                 }
             });
-            console.log(hostParticipant);
 
             let botParticipant;
             let botParticipant_1;
@@ -44,7 +40,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                         seatNumber : botSeat
                     }
                 });
-                console.log(botParticipant);
 
                 const hostTokens = await tx.token.createMany({
                     data : [
@@ -54,7 +49,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                         { participantId : hostParticipant.participantId, tokenIndex : 3 }
                     ]
                 });
-                console.log(hostTokens);
 
                 const botTokens = await tx.token.createMany({
                     data : [
@@ -64,7 +58,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                         { participantId : botParticipant.participantId, tokenIndex : 3 }
                     ]
                 });
-                console.log(botTokens);
             }
             else if(numberOfPlayers === 4){
                 const botSeats = getAvailableBotSeats({hostSeat , totalPlayers : numberOfPlayers});
@@ -89,9 +82,6 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                         seatNumber : botSeats[2]
                     }
                 });
-                console.log(botParticipant_1);
-                console.log(botParticipant_2);
-                console.log(botParticipant_3);
 
                 const hostTokens = await tx.token.createMany({
                     data : [
@@ -101,16 +91,12 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                         { participantId : hostParticipant.participantId, tokenIndex : 3 }
                     ]
                 });
-                console.log(hostTokens);
 
                 const bot_1_tokens = await createTokensForParticipant({participantId : botParticipant_1.participantId , tx});
-                console.log(bot_1_tokens);
 
                 const bot_2_tokens = await createTokensForParticipant({participantId : botParticipant_2.participantId , tx});
-                console.log(bot_2_tokens);
 
                 const bot_3_tokens = await createTokensForParticipant({participantId : botParticipant_3.participantId , tx});
-                console.log(bot_3_tokens);
             }
 
             let participants = [];

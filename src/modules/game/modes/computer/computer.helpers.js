@@ -7,10 +7,10 @@ export const determineHostSeat = (chosenColor) => {
     else if(chosenColor === 'green'){
         return 1;
     }
-    else if(chosenColor === 'yellow'){
+    else if(chosenColor === 'blue'){
         return 2;
     }
-    else if(chosenColor === 'blue'){
+    else if(chosenColor === 'yellow'){
         return 3;
     }
 }
