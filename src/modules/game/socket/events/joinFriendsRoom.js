@@ -35,18 +35,18 @@ export const joinFriendsRoom = (socket , io) => {
             const isUserAlreadyJoined = await isUserAlreadyInGameSessionService({userId , roomCode});
 
             if(isUserAlreadyJoined){
-                socket.emit("error" , { message : "Already Joined !!!" });
+                return socket.emit("error" , { message : "Already Joined !!!" });
             };
 
             const gameSessionData = await enterUserIntoGameSessionService({userId , roomCode});
 
             if(gameSessionData){
-                socket.emit("joined-friends-room" , gameSessionData);
+                return socket.emit("joined-friends-room" , gameSessionData);
             }
         }
         catch (error) {
             console.error("Socket Auth Failed :", error.message);
-            socket.emit("error", { message: "Unauthorized: Invalid token !!!" });                   
+            return socket.emit("error", { message: "Unauthorized: Invalid token !!!" });                   
         }
     })
 }

@@ -20,13 +20,14 @@ export const createFriendsRoom = (socket , io) => {
 
             const gameSessionData = await createMatchSessionService({totalPlayers , preferredColor , userId});
 
-            if(gameSessionData){
-                socket.emit("created-game-session" , gameSessionData);
+            if(!gameSessionData){
+                return socket.emit("error" , { message : "Error Creating Private Game Session !!!"});
             }
+            return socket.emit("created-game-session" , gameSessionData);
         }
         catch (error) {
             console.error("Socket Auth Failed :", error.message);
-            socket.emit("error", { message: "Unauthorized: Invalid token !!!" });                
+            return socket.emit("error", { message: "Unauthorized: Invalid token !!!" });                
         }
     });
 }

@@ -1,7 +1,7 @@
 import prisma from "../../../../db/DB.js";
 import { generateRoomCode } from "../../utils/roomCode.utils.js";
 
-export const createMatchSessionService = async (group) => {
+export const createMatchSessionService = async ({group , totalPlayers}) => {
   try {
     const gameSessionData = await prisma.$transaction(async (tx) => {
       const roomCode = generateRoomCode(6);
@@ -11,6 +11,7 @@ export const createMatchSessionService = async (group) => {
           gameMode: "RANDOM",
           gameStatus: "WAITING",
           roomCode: roomCode,
+          maxPlayers : totalPlayers
         },
       });
 

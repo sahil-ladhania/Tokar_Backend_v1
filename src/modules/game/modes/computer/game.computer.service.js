@@ -11,7 +11,8 @@ export const createGameSessionService = async({userId , numberOfPlayers , choseT
                 data : {
                     gameMode : 'COMPUTER',
                     gameStatus : 'WAITING',
-                    roomCode : roomCode
+                    roomCode : roomCode,
+                    maxPlayers : numberOfPlayers
                 }
             });
 

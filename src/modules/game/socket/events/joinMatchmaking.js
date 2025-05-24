@@ -25,16 +25,16 @@ export const joinMatchmaking = (socket , io) => {
             const fullGroup = attemptMatch({totalPlayers}); 
 
             if(fullGroup){
-                const gameSessionData = await createMatchSessionService(fullGroup);
+                const gameSessionData = await createMatchSessionService({group : fullGroup , totalPlayers});
 
                 fullGroup.forEach((player) => {
-                    io.to(player.socketId).emit("match-found" , gameSessionData);
+                    return io.to(player.socketId).emit("match-found" , gameSessionData);
                 });
             }   
         }
         catch (error) {
             console.error("Socket Auth Failed :", error.message);
-            socket.emit("error", { message: "Unauthorized: Invalid token !!!" });     
+            return socket.emit("error", { message: "Unauthorized: Invalid token !!!" });     
         }
     });
 }
