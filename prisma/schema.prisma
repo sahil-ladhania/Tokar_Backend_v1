@@ -72,6 +72,7 @@ model GameSession {
   roomCode String @unique
   gameMode GameMode
   gameStatus GameStatus
+  currentTurnSeat Int? 
   participants Participant[]
   moveLogs MoveLog[]
   invitations Invitation[]
