@@ -1,9 +1,8 @@
-import { checkIfItsYourTurn, getGameStatus } from "../../game-engine/game.engine.service.js";
+import { checkIfItsYourTurnService, checkIfParticipantIsBotService, getGameStatusService, getValidTokensToMoveService } from "../../game-engine/game.engine.service.js";
 import { rollDiceSchema } from "../../utils/board.data-validatior.js";
 
 export const rollDice = (socket , io) => {
     socket.emit("roll-dice" , async({roomCode , participantId , token}) => {
-        // 1. Validate inputs with Zod
         const result = rollDiceSchema.safeParse({roomCode , participantId , token});
 
         if(!result.success){
@@ -14,23 +13,27 @@ export const rollDice = (socket , io) => {
             return socket.emit("error" , { message : "Unauthorized: Token missing !!!" });
         };
 
-        // 2. Verify game is in-progress
-        const gameStatus = await getGameStatus(roomCode);
+        const gameStatus = await getGameStatusService(roomCode);
 
         if(gameStatus === 'IN_PROGRESS'){
-            // 3. Verify it is this participant’s turn
-            const isItYourTurn = await checkIfItsYourTurn(participantId , roomCode); 
-            if(isItYourTurn){
-                // 4. Generate random dice value (1–6)
-                const diceValue = Math.floor(Math.random() * 6) + 1;
+            const isParticipantBot = await checkIfParticipantIsBotService(participantId , roomCode);
 
-                // 5. Get all valid tokens for that dice value (via boardUtils.getValidMoves)
-                // 6. Emit to room → "dice-rolled" with { participantId, diceValue, validMoves }      
-                io.to(roomCode).emit("dice-rolled", {
-                    participantId,
-                    diceValue,
-                    validMoves
-                });
+            if(isParticipantBot){
+                // Logic to be implemented ...
+            }
+            else{
+                const isItYourTurn = await checkIfItsYourTurnService(participantId , roomCode);
+                if(isItYourTurn){
+                    const diceValue = Math.floor(Math.random() * 6) + 1;
+
+                    const validTokensToMove = await getValidTokensToMoveService({participantId , diceValue});
+
+                    io.to(roomCode).emit("dice-rolled", {
+                        participantId : participantId,
+                        diceValue : diceValue,
+                        validTokensToMove : validTokensToMove
+                    });
+                }
             }
         }
     });

@@ -1,0 +1,1 @@
+export const MAX_BOARD_POSITION = 56;

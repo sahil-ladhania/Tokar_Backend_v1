@@ -1,4 +1,5 @@
 import prisma from "../../../db/DB.js";
+import { MAX_BOARD_POSITION } from "../utils/board.constant.js";
 
 export const getGameSessionDataService = async(roomCode) => {
     try {
@@ -47,7 +48,7 @@ export const updatedGameSessionDataService = async(roomCode) => {
     }
 }
 
-export const getGameStatus = async(roomCode) => {
+export const getGameStatusService = async(roomCode) => {
     try {
         const gameStatus = await prisma.gameSession.findUnique({
             where : {
@@ -66,7 +67,7 @@ export const getGameStatus = async(roomCode) => {
     }
 };
 
-export const checkIfItsYourTurn = async(participantId , roomCode) => {
+export const checkIfItsYourTurnService = async(participantId , roomCode) => {
     try {
         const gameSessionData = await prisma.gameSession.findUnique({
             where : {
@@ -92,3 +93,64 @@ export const checkIfItsYourTurn = async(participantId , roomCode) => {
         throw new Error("Error Checking If Its Your Turn : " , error.message);           
     }
 }
+
+export const checkIfParticipantIsBotService = async(participantId , roomCode) => {
+    try {  
+        const gameSessionData = await prisma.gameSession.findUnique({
+            where : {
+                roomCode : roomCode
+            },
+            select : {
+                participants : true,
+            }
+        });
+
+        const currentParticipant = gameSessionData.participants.find((p) => p.participantId === participantId);
+
+        if(!currentParticipant){
+            console.log("Participant not found in this game session !!!");
+            return false;
+        }
+
+        return currentParticipant.isBot === true;
+    }
+    catch (error) {
+        console.log("Error Checking If the Prticipant is a Bot : " , error.message);
+        throw new Error("Error Checking If the Prticipant is a Bot : " , error.message);                      
+    }
+}
+
+export const getValidTokensToMoveService = async ({ participantId, diceValue }) => {
+    try {
+        const currentParticipantTokens = await prisma.participant.findUnique({
+            where: {
+                participantId: participantId
+            },
+            select: {
+                tokens: true
+            }
+        });
+
+        let validTokens = [];
+
+        currentParticipantTokens.tokens.forEach((token) => {
+            if (token.tokenState === 'FINISHED'){
+                return;
+            };
+            if (token.tokenState === 'HOME' && diceValue !== 6){
+                return;
+            };
+            if ((token.position + diceValue) > MAX_BOARD_POSITION){
+                return;  
+            };
+
+            validTokens.push(token.tokenId);
+        });
+
+        return validTokens;
+    }
+    catch (error) {
+        console.log("Error Getting Valid Tokens To Move :", error.message);
+        throw new Error("Error Getting Valid Tokens To Move : " + error.message);
+    }
+};
