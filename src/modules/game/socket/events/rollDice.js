@@ -2,7 +2,7 @@ import { checkIfItsYourTurnService, checkIfParticipantIsBotService, getGameStatu
 import { rollDiceSchema } from "../../utils/board.data-validatior.js";
 
 export const rollDice = (socket , io) => {
-    socket.emit("roll-dice" , async({roomCode , participantId , token}) => {
+    socket.on("roll-dice" , async({roomCode , participantId , token}) => {
         const result = rollDiceSchema.safeParse({roomCode , participantId , token});
 
         if(!result.success){
