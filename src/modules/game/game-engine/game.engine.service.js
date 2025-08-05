@@ -153,3 +153,94 @@ export const getValidTokensToMoveService = async ({ participantId, diceValue }) 
         throw new Error("Error Getting Valid Tokens To Move : " + error.message);
     }
 };
+
+export const getTokenDetailsService = async ({ participantId , tokenId }) => {
+    try {
+        const token = await prisma.token.findUnique({
+            where : {
+                participantId : participantId,
+                tokenId : tokenId
+            },
+            select : {
+                tokenIndex : true,
+                position : true,
+                tokenState : true
+            }
+        });
+
+        return token;
+    }
+    catch (error) {
+        console.log("Error Getting Token Details :", error.message);
+        throw new Error("Error Getting Token Details : " + error.message);
+    }
+};
+
+export const updateTokenStateService = async ({ participantId , tokenId , tokenState}) => {
+    try {
+        const updatedTokenState = await prisma.token.update({
+            where : {
+                participantId : participantId,
+                tokenId : tokenId
+            },
+            data : {
+                tokenState : tokenState
+            }
+        });
+
+        return updatedTokenState;
+    }
+    catch (error) {
+        console.log("Error Updating Token State :", error.message);
+        throw new Error("Error Updating Token State : " + error.message);
+    }
+};
+
+export const getAllTokensInGameSessionService = async ({ roomCode }) => {
+    try {
+        const gameSession = await prisma.gameSession.findFirst({
+            where : {
+                roomCode : roomCode
+            },
+            include : {
+                participants : {
+                    include : {
+                        tokens : true
+                    }
+                }
+            }
+        });
+
+        if (!gameSession) {
+            throw new Error("Game session not found for the given room code !!!");
+        };
+
+        const allTokens = gameSession.participants.flatMap((p) => p.tokens);
+
+        return allTokens;
+    }
+    catch (error) {
+        console.log("Error Getting All Tokens in Game Session :", error.message);
+        throw new Error("Error Getting All Tokens in Game Session : " + error.message);
+    }
+};
+
+export const captureOpponentService = async ({ opponent }) => {
+    try {
+        const capturedOpponent = await prisma.token.update({
+            where : {
+                tokenId : opponent
+            },
+            data : {
+                tokenIndex : -1,
+                tokenState : 'HOME'
+            }
+        });
+
+        return capturedOpponent;
+    }
+    catch (error) {
+        console.log("Error Getting All Tokens in Game Session :", error.message);
+        throw new Error("Error Getting All Tokens in Game Session : " + error.message);
+    }
+};

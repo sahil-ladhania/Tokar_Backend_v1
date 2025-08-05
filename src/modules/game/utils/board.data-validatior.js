@@ -15,6 +15,6 @@ export const moveTokenSchema = z.object({
     roomCode : z.string(),
     participantId : z.string(),
     diceValue : z.number(),
-    tokenIndex : z.string(),
+    tokenId : z.string(),
     token : z.string()
 });
