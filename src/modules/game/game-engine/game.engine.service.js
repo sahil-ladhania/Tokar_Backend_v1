@@ -24,7 +24,6 @@ export const getGameSessionDataService = async(roomCode) => {
 
 export const updatedGameSessionDataService = async(roomCode) => {
     try {
-        // logic
         const updatedGameSessionData = await prisma.gameSession.update({
             where : {
                 roomCode : roomCode

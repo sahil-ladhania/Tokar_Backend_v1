@@ -6,7 +6,7 @@ export const attemptMatch = ({totalPlayers}) => {
         return null;
     };
 
-    queueStore[totalPlayers] = queueStore[totalPlayers].filter(q =>
+    queueStore[totalPlayers] = queueStore[totalPlayers].filter(q => // understand in depth
         !fullGroup.some(p => p.userId === q.userId)
     );
     return fullGroup;

@@ -30,7 +30,7 @@ export const joinMatchmaking = (socket , io) => {
                 fullGroup.forEach((player) => {
                     return io.to(player.socketId).emit("match-found" , gameSessionData);
                 });
-            }   
+            };
         }
         catch (error) {
             console.error("Socket Auth Failed :", error.message);

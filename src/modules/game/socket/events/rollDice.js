@@ -2,7 +2,7 @@ import { checkIfItsYourTurnService, checkIfParticipantIsBotService, getGameStatu
 import { rollDiceSchema } from "../../utils/board.data-validatior.js";
 
 export const rollDice = (socket , io) => {
-    socket.on("roll-dice" , async({roomCode , participantId , token}) => {
+    socket.on("roll-dice" , async({roomCode , participantId , token}) => { // Frontend se player jb dice pe click krega , roll-dice triger hoga
         const result = rollDiceSchema.safeParse({roomCode , participantId , token});
 
         if(!result.success){
@@ -16,17 +16,12 @@ export const rollDice = (socket , io) => {
         const gameStatus = await getGameStatusService(roomCode);
 
         if(gameStatus === 'IN_PROGRESS'){
-            const isParticipantBot = await checkIfParticipantIsBotService(participantId , roomCode);
+            const isItYourTurn = await checkIfItsYourTurnService(participantId , roomCode);
 
-            if(isParticipantBot){
-                // Logic to be implemented ...
-            }
-            else{
-                const isItYourTurn = await checkIfItsYourTurnService(participantId , roomCode);
                 if(isItYourTurn){
                     const diceValue = Math.floor(Math.random() * 6) + 1;
 
-                    const validTokensToMove = await getValidTokensToMoveService({participantId , diceValue});
+                    const validTokensToMove = await getValidTokensToMoveService({participantId , diceValue}); 
 
                     io.to(roomCode).emit("dice-rolled", {
                         participantId : participantId,
@@ -34,7 +29,6 @@ export const rollDice = (socket , io) => {
                         validTokensToMove : validTokensToMove
                     });
                 }
-            }
         }
     });
 };
