@@ -244,3 +244,41 @@ export const captureOpponentService = async ({ opponent }) => {
         throw new Error("Error Getting All Tokens in Game Session : " + error.message);
     }
 };
+
+export const getTokenSeatNumberService = async ({ participantId }) => {
+    try {
+        const tokensSeatNumber = await prisma.participant.findUnique({
+            where : {
+                participantId : participantId
+            },
+            select : {
+                seatNumber : true
+            }
+        });
+
+        return tokensSeatNumber;
+    }
+    catch (error) {
+        console.log("Error Getting Tokens Seat Number :", error.message);
+        throw new Error("Error Getting Tokens Seat Number : " + error.message);
+    }
+};
+
+export const updateTokenPositionService = async ({ tokenId , newPosition }) => {
+    try {
+        const updatedTokenPosition = await prisma.token.update({
+            where : {
+                tokenId : tokenId
+            },
+            data : {
+                position : newPosition
+            }
+        });
+
+        return updatedTokenPosition;
+    }
+    catch (error) {
+        console.log("Error Updating Token Position :", error.message);
+        throw new Error("Error Updating Token Position : " + error.message);
+    }
+};
