@@ -1,5 +1,5 @@
 import { captureOpponentService, getAllTokensInGameSessionService, getTokenDetailsService, getTokenSeatNumberService, getValidTokensToMoveService, updateTokenPositionService, updateTokenStateService } from "../../game-engine/game.engine.service.js";
-import { BLUE_HOME_ENTRANCE, BLUE_SAFE_ZONE, COMMON_PATH_LENGTH, GREEN_HOME_ENTRANCE, GREEN_SAFE_ZONE, MAX_BOARD_POSITION, RED_HOME_ENTRANCE, RED_SAFE_ZONE, YELLOW_HOME_ENTRANCE, YELLOW_SAFE_ZONE } from "../../utils/board.constant.js";
+import { BLUE_HOME_ENTRANCE, BLUE_SAFE_ZONE, COMMON_PATH_LENGTH, GREEN_HOME_ENTRANCE, GREEN_SAFE_ZONE, MAX_BOARD_POSITION, RED_HOME_ENTRANCE, RED_SAFE_ZONE, SAFE_ZONE_LENGTH, YELLOW_HOME_ENTRANCE, YELLOW_SAFE_ZONE } from "../../utils/board.constant.js";
 import { moveTokenSchema } from "../../utils/board.data-validatior.js"
 
 export const  moveToken = (socket , io) => {
@@ -26,6 +26,12 @@ export const  moveToken = (socket , io) => {
         
         // Step 3: Calculate New Position for the token ("Path Switching" logic)
         // To-Do :-
+        const SAFE_ZONE_START_POSITION = {
+            0: 52, // RED
+            1: 57, // GREEN
+            2: 62, // YELLOW
+            3: 67  // BLUE
+        };          
         // 3a. Get the current position of the token from `tokenData.position`.
         const currentTokenPosition = tokenData.position;
 
@@ -34,6 +40,7 @@ export const  moveToken = (socket , io) => {
 
         // 3c. Based on the seatNumber, set the `homeEntrancePosition`
         let homeEntrancePosition;
+
         if(tokenSeatNumber === 0){
             homeEntrancePosition = RED_HOME_ENTRANCE;
         }
@@ -47,35 +54,47 @@ export const  moveToken = (socket , io) => {
             homeEntrancePosition = BLUE_HOME_ENTRANCE;
         }
 
-        // 3d. Check if the token is already in the safe zone (i.e., position >= 51)
-        // If yes, then -
-        if(currentTokenPosition >= COMMON_PATH_LENGTH){
-            // - Add `diceValue` to current position
-            const newPosition = (currentTokenPosition + diceValue);
-            // - If newPosition > MAX_BOARD_POSITION (56), the move is invalid → emit error and return
-            if(newPosition > MAX_BOARD_POSITION){
+        // 3d. Check if the token is already in the safe zone
+        const safeZoneStart = SAFE_ZONE_START_POSITION[tokenSeatNumber];
+        const safeZoneEnd = (safeZoneStart + SAFE_ZONE_LENGTH - 1);
+
+        let newPosition;
+        // Token already in safe zone
+        if(currentTokenPosition >= safeZoneStart){
+            newPosition = (currentTokenPosition + diceValue);
+            if(newPosition > safeZoneEnd){
                 return socket.emit("error", { message: "Invalid Move! You need an exact dice roll to finish." });
             }
-            // - Else, assign newPosition as the sum
+        }
+        // Token in common path
+        else{
+            const tentativePosition = (currentTokenPosition + diceValue);
+            // Check if the move crosses home entrance into safe zone
+            // If Crosses into safe zone
+            if((currentTokenPosition <= homeEntrancePosition) && (tentativePosition > homeEntrancePosition)){
+                const stepsToEnterSafeZone = (homeEntrancePosition - currentTokenPosition);
+                const remainingSteps = (diceValue - stepsToEnterSafeZone);            
+                newPosition = (safeZoneStart + remainingSteps - 1); // -1 for zero-based safe zone positions
+                
+                if(newPosition >= safeZoneEnd){
+                    return socket.emit("error", { message: "Invalid Move! You need an exact dice roll to finish." });
+                }
+            }
+            // Else Normally move inside common path with wrapping
             else{
-                const updatedTokenPosition = await updateTokenPositionService({ tokenId , newPosition});
+                if(tentativePosition > COMMON_PATH_LENGTH){
+                    newPosition = (tentativePosition % COMMON_PATH_LENGTH);
+                    if(newPosition === 0){
+                        newPosition = COMMON_PATH_LENGTH;
+                    }
+                    else{
+                        newPosition = tentativePosition;
+                    }
+                }
             }
         }
-        // If no, token is still in the common path -
-        else{
-            // - Calculate tentativePosition = currentPosition + diceValue 
-            //   - If currentPosition <= homeEntrancePosition AND tentativePosition <= homeEntrancePosition:
-            //      - Token hasn't crossed entrance → newPosition = tentativePosition
-            //   - Else if currentPosition <= homeEntrancePosition AND tentativePosition > homeEntrancePosition:
-            //     - Token enters safe zone:
-            //       - stepsToEnterSafeZone = homeEntrancePosition - currentPosition
-            //       - remainingSteps = diceValue - stepsToEnterSafeZone
-            //       - newPosition = COMMON_PATH_LENGTH - 1 + remainingSteps
-            //   - If newPosition > MAX_BOARD_POSITION (56):
-            //     - Invalid move → emit error and return
-            //   - Else if currentPosition > homeEntrancePosition:
-            //     - Token has passed the entrance (because of board wrapping), continue moving as (pos + dice) % COMMON_PATH_LENGTH
-        }
+
+        const updatedTokenPosition = await updateTokenPositionService({ tokenId , newPosition});
 
         // Step 4: Determine and Update Token State
         // To-Do :-
